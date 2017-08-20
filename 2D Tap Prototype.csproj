@@ -94,19 +94,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\AbilityBehaviour.cs" />
+    <Compile Include="Assets\Scripts\AbilityMeta.cs" />
     <Compile Include="Assets\Scripts\Click.cs" />
     <Compile Include="Assets\Scripts\EnemyBehaviour.cs" />
     <Compile Include="Assets\Scripts\EnemyPool.cs" />
     <Compile Include="Assets\Scripts\HealthBehavior.cs" />
     <Compile Include="Assets\Scripts\ItemBehaviour.cs" />
+    <Compile Include="Assets\Scripts\ItemMeta.cs" />
     <Compile Include="Assets\Scripts\LevelPrefManager.cs" />
     <Compile Include="Assets\Scripts\OffenseBehavior.cs" />
     <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
     <Compile Include="Assets\Scripts\PlayerSettingsManager.cs" />
+    <Compile Include="Assets\Scripts\PlayerStatMeta.cs" />
     <Compile Include="Assets\Scripts\ProgressTracker.cs" />
     <Compile Include="Assets\Scripts\SceneControlManager.cs" />
     <Compile Include="Assets\Scripts\TempGameObject.cs" />
-    <Compile Include="Assets\test.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

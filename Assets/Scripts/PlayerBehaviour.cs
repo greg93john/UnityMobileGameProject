@@ -8,21 +8,22 @@ using UnityEngine.UI;
 public class PlayerBehaviour : MonoBehaviour {
     public ItemBehaviour[] items;
     public Animator playerAnimator;
-    public Slider healthBar;
 
-    private bool abilitySpent = false;
+    private bool usingAbility = false;
     private EnemyBehaviour enemy;
     private HealthBehavior myHealth;
-    private OffenseBehavior offense;
+    private OffenseBehavior myOffense;
+    private ProgressTracker gameState;
 
     // will expand upon Status ailments later
     private Status currentStatus = Status.none;
 
     private void Start() {
         myHealth = GetComponent<HealthBehavior>();
-        offense = GetComponent<OffenseBehavior>();
+        myOffense = GetComponent<OffenseBehavior>();
+        gameState = GameObject.FindObjectOfType<ProgressTracker>();
         myHealth.ResetHealth();
-        UpdateHealthBar();
+        myHealth.UpdateHealthBar();
         if (items[0]) { SetItemUsesToMax(); }
     }
 
@@ -30,16 +31,10 @@ public class PlayerBehaviour : MonoBehaviour {
         if (!enemy) { FindEnemy(); }
     }
 
-    public void UpdateHealthBar() {
-        if (healthBar) {
-            healthBar.value = (float)myHealth.GetCurrentHealth()/(float)myHealth.maxHealth;
-        } else { Debug.Log("Warning, Healthbar is not assigned in scene view."); }
-    }
-
     public void Attack() {
-        if(myHealth.GetCurrentHealth() > 0){
+        if(!usingAbility && gameState.GameStillInSession()){
             AttackAnimations();
-            offense.AttackTarget();
+            myOffense.AttackTarget(myOffense.GetAttackPower());
         }
     } public void AttackAnimations() {
         playerAnimator.SetTrigger("Attack");
@@ -50,7 +45,7 @@ public class PlayerBehaviour : MonoBehaviour {
     private void FindEnemy() {
         enemy = GameObject.FindObjectOfType<EnemyBehaviour>();
         if (enemy) {
-            offense.SetAttackTarget(enemy.gameObject);
+            myOffense.SetAttackTarget(enemy.gameObject);
         }
     }
 
@@ -62,6 +57,30 @@ public class PlayerBehaviour : MonoBehaviour {
     private void SetItemUsesToMax() {
         for (int i = 0; i < items.Length; i++) {
             items[i].IncreaseCurrentReserveBy(items[i].GetMaxReserveAmount());
+        }
+    }
+
+    public Animator GetPlayerAnimator() {
+        return playerAnimator;
+    }
+
+    public void SetMyAnimator(string clipName) {
+        playerAnimator.SetTrigger(clipName);
+    }
+
+    public void AbilityInUse(bool setVal) {
+        usingAbility = setVal;
+    } public bool GetAbilityUseStatus() {
+        return usingAbility;
+    }
+
+    public void EndDodgeStatus() {
+        AbilityBehaviour[] abilities = GameObject.FindObjectsOfType<AbilityBehaviour>();
+        for(int i = 0; i < abilities.Length; i++) {
+            if(abilities[i].abilityType == AbilityType.dodge) {
+                abilities[i].CancelAbility("dodge");
+                break;
+            }
         }
     }
 }

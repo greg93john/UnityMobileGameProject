@@ -8,24 +8,24 @@ using UnityEngine.UI;
 public class EnemyBehaviour : MonoBehaviour {
     public float attackRateInSeconds;
     public Animator enemyAnimator;
+    public Text nameLabel;
 
     private GameObject player;
     private HealthBehavior myHealth, playerHealth;
     private OffenseBehavior myOffense;
-    private Text label;
     private Status currentStatus = Status.none;
     
 	void Start () {
         ResetEnemy();
         FindPlayer();
-        label = GameObject.Find("Enemy Label").GetComponent<Text>();
-        if (label) { label.text = gameObject.name; }
+        if (nameLabel) { nameLabel.text = gameObject.name; }
     }
 
     public void ResetEnemy() {
         myHealth = GetComponent<HealthBehavior>();
         myOffense = GetComponent<OffenseBehavior>();
         myHealth.ResetHealth();
+        myHealth.UpdateHealthBar();
         Invoke("AttackCyclePrimer", attackRateInSeconds);
     } private void AttackCyclePrimer() {
         StartCoroutine(AttackCycle());
@@ -53,8 +53,14 @@ public class EnemyBehaviour : MonoBehaviour {
         }
         Debug.Log("Enemy Attack Cycle has ended");
     } private void Attack() {
-        enemyAnimator.SetTrigger("Attack");
-        myOffense.AttackTarget();
+        if (myOffense.CanAttackStatus()) {
+            enemyAnimator.SetTrigger("Attack");
+        }
+        myOffense.AttackTarget(myOffense.GetAttackPower());
+    }
+
+    public void SetMyAnimator(string clipName) {
+        enemyAnimator.SetTrigger(clipName);
     }
 
     public void EnemyDeathAnimation() {

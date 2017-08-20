@@ -10,7 +10,7 @@ public class ProgressTracker : MonoBehaviour {
     public GameObject postMatchMenu;
 
     private int reservedEnemies;
-    private bool sameRound = false;
+    private bool sameRound = false, gameActive = true;
     private Vector3 enemyPosition;
     private GameObject enemy;
     private EnemyPool enemyPool;
@@ -62,6 +62,7 @@ public class ProgressTracker : MonoBehaviour {
         Debug.Log("Next Round! " + reservedEnemies + " more enemies to go!");
     } private void SpawnNextEnemy() {
         enemy = Instantiate(enemyPool.GetNextEnemy(), enemyPosition, Quaternion.identity);
+        enemy.gameObject.name = enemy.gameObject.name.Replace("(Clone)", ""); // make a list of names and grab random.range from the list
         enemy.transform.parent = enemyParentTransform;
         enemy.transform.localScale = new Vector3(1, 1, 1);
         reservedEnemies--;
@@ -80,12 +81,14 @@ public class ProgressTracker : MonoBehaviour {
     private void LevelComplete() {
         Debug.Log("Level Complete!");
         resultText.text = "You Win!";
+        gameActive = false;
         ShowPostMatchMenu(true);
     }
 
     public void PlayerLost() {
         resultText.text = "You Lose!";
         ShowPostMatchMenu(true);
+        gameActive = false;
     }
 
     public void ShowPostMatchMenu(bool answer) {
@@ -98,5 +101,9 @@ public class ProgressTracker : MonoBehaviour {
 
     public void InitializeReservedEnemiesCount(int amount) {
         reservedEnemies = amount;
+    }
+    
+    public bool GameStillInSession() {
+        return gameActive;
     }
 }

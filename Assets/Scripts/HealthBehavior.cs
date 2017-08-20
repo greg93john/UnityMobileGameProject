@@ -4,38 +4,42 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthBehavior : MonoBehaviour {
-    public int maxHealth;
+    public int maxHealth, defense;
     public Text changeDisplayText;
     public Color damageDisplayColor, healingDisplayColor;
     public Transform indicatorPositionTransform;
     public Transform[] damageImagePositions;
     public GameObject damageImage, healImage;
+    public Slider healthBar;
 
-    private int currentHealth;
-    private int chosenDamagePosition = -1;
+    private int currentHealth, dividerValue = 1, chosenDamagePosition = -1, absorbAmount = 0;
+    private bool blockDamageEnabled = false, isInvulnerable = false, absorbingDamage = false;
 
     public void IncreaseHealth(int healing) {
         if (healing >= 0) {
             currentHealth += healing;
             currentHealth = (int)Mathf.Clamp(currentHealth, 0, maxHealth);
             ShowChange(healing, healingDisplayColor);
-        } else { ReduceHealth(healing); }
+        } else { ReduceHealth(-healing); }
     } 
 
     public void ReduceHealth(int damage) {
-        if (damage >= 0) {
-            if (currentHealth > 0) {
-                currentHealth -= damage;
-                currentHealth = (int)Mathf.Clamp(currentHealth, 0, maxHealth);
-                ShowChange(damage, damageDisplayColor);
-                Debug.Log("current health of " + gameObject + ": " + currentHealth);
-            }
-        } else { IncreaseHealth(damage); }
+        if (!absorbingDamage) {
+            if (blockDamageEnabled) { damage = damage / dividerValue; }
+            if (damage >= 0) {
+                damage = ReduceDamage(damage);
+                if (currentHealth > 0 && !isInvulnerable) {
+                    currentHealth -= damage;
+                    currentHealth = (int)Mathf.Clamp(currentHealth, 0, maxHealth);
+                    ShowChange(damage, damageDisplayColor);
+                    Debug.Log("current health of " + gameObject + ": " + currentHealth);
+                }
+            } else { IncreaseHealth(-damage); }
+        } else { IncreaseHealth(absorbAmount); }
     }
 
     private void HandlePlayerBehavior() {
         PlayerBehaviour player = GetComponent<PlayerBehaviour>();
-        player.UpdateHealthBar();
         if(currentHealth <= 0) { player.PlayerDeath(); }
     } private void HandleEnemyBehavior() {
         EnemyBehaviour enemy = GetComponent<EnemyBehaviour>();
@@ -50,7 +54,8 @@ public class HealthBehavior : MonoBehaviour {
         spawning.transform.position = indicatorPositionTransform.position;
 
         if(changeValColor == damageDisplayColor && damageImage) { DamageImageDisplay(); }
-        else if(changeValColor == healingDisplayColor && healImage) { HealImageDisplay(); }
+
+        if(healthBar) { UpdateHealthBar(); }
 
         if (GetComponent<PlayerBehaviour>()) { HandlePlayerBehavior(); } 
         else if (GetComponent<EnemyBehaviour>()) { HandleEnemyBehavior(); }
@@ -69,12 +74,6 @@ public class HealthBehavior : MonoBehaviour {
         GameObject dmgImg = Instantiate(damageImage, damageImagePositions[chosenDamagePosition].position, Quaternion.identity);
         dmgImg.transform.parent = damageImagePositions[chosenDamagePosition];
         dmgImg.transform.position = damageImagePositions[chosenDamagePosition].position;
-    } private void HealImageDisplay() {
-        Vector3 healingImageOrigin = transform.position;
-
-        GameObject healImg = Instantiate(healImage, transform.position, Quaternion.identity);
-        healImg.transform.parent = transform;
-        healImg.transform.position = transform.position; ;
     }
 
     public void SetMaxHealth(int max) {
@@ -87,5 +86,55 @@ public class HealthBehavior : MonoBehaviour {
 
     public void ResetHealth() {
         currentHealth = maxHealth;
+    }
+
+    public void UpdateHealthBar() {
+        if (healthBar) {
+            healthBar.value = (float)currentHealth / (float)maxHealth;
+        } else { Debug.Log("Warning, Healthbar is not assigned in scene view."); }
+    }
+
+
+
+
+
+
+    // Defense Functions
+
+    private int ReduceDamage(int incomingDamage) {
+        int calculatedDamage = (int)Mathf.Clamp(incomingDamage - defense, 1, incomingDamage);
+        return calculatedDamage;
+    }
+
+    public void RaiseDefense(int raiseVal) {
+        defense += raiseVal;
+    }
+
+    public void LowerDefense(int lowerVal) {
+        defense -= lowerVal;
+    }
+
+    public int GetDefenseValue() {
+        return defense;
+    }
+    public void SetDefenseValue(int setVal) {
+        defense = setVal;
+    }
+
+    public void EnableBlockDamage(bool enableVal) {
+        blockDamageEnabled = enableVal;
+    } public void SetDividerValue(int setVal) {
+        dividerValue = setVal;
+    }
+
+    public void SetAbsorbAttack(bool setVal, int setAbsorbAmount) {
+        absorbingDamage = setVal;
+        absorbAmount = setAbsorbAmount;
+    }
+
+    public void SetInvulnerability(bool setVal) {
+        isInvulnerable = setVal;
+    } public bool GetInvulnerabilityStatus() {
+        return isInvulnerable;
     }
 }
