@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b5f1b5f37cd6c374580c696c11dc020d
+guid: d316521b529461142931eda7fe1fb03c
 timeCreated: 1501737401
 licenseType: Free
 TrueTypeFontImporter:
@@ -12,7 +12,8 @@ TrueTypeFontImporter:
   fontName: Marker Felt
   fontNames:
   - Marker Felt
-  fallbackFontReferences: []
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 8ac44d9ad3bda694094d334530e64499, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
